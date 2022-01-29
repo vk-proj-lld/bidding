@@ -18,9 +18,9 @@ func NewConsoleOutPutUsecase() notifiers.IOut {
 func (out *outUseCase) Write(contents ...interface{}) {
 	out.mu.Lock()
 	defer out.mu.Unlock()
-	fmt.Println("---------------------------------------------------------------------------------------------------------------------------")
-	for content := range contents {
+	fmt.Println("-----------------------------------")
+	for _, content := range contents {
 		fmt.Println(content)
 	}
-	fmt.Println("---------------------------------------------------------------------------------------------------------------------------")
+	fmt.Println("-----------------------------------")
 }
