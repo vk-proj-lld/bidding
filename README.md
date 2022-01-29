@@ -29,3 +29,36 @@ changes. Follow SOLID principles.
 - Create Bid: Sell an antique coin. Lowest price: Rs. 100000, Highest Price: Rs. 10000000, Finalization time: 2021-06-16T21:00:00Z
 - Bid1: 200000, Bid2: 5000000, Bid3: 5300000, Bid4: 600000
 - At finalization time: Bid3 should be selected and Sellers profit should be **5300000**.
+
+## Project Hierarchy
+```
+.
+├── bidding.go
+├── business
+│   ├── repo
+│   │   └── auctionRepo.go
+│   └── uc
+│       ├── AuctionUC.go
+│       └── outputconsole.go
+├── entities
+│   ├── earticle
+│   │   └── article.go
+│   ├── eauction
+│   │   ├── auction.go
+│   │   ├── auctionBids.go
+│   │   └── bid.go
+│   ├── leaderboard
+│   │   └── leaderBoardLine.go
+│   ├── strategy
+│   │   └── randomBidding.go
+│   └── user.go
+├── go.mod
+├── go.sum
+└── interfaces
+    ├── iacutionrepo.go
+    ├── iauctionuc.go
+    ├── istrategy
+    │   └── istrategy.go
+    └── notifiers
+        └── iout.go
+```
