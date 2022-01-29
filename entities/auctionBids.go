@@ -17,10 +17,10 @@ type AuctionBids struct {
 func bidComp(b1, b2 interface{}) int {
 	bid1, ok1 := b1.(*Bid)
 	bid2, ok2 := b2.(*Bid)
-	if !ok1 || ok2 {
+	if !ok1 && ok2 {
 		return 0
 	}
-	if bid1.price > bid2.price {
+	if bid1.price < bid2.price {
 		return 1
 	}
 	return -1
@@ -45,11 +45,13 @@ func (aucbids *AuctionBids) GetHighestBid() *Bid {
 
 func (aucbids *AuctionBids) ValidateBid(bid *Bid) error {
 	topbid := aucbids.GetHighestBid()
-	if bid.Price() <= topbid.Price() {
-		return errors.New("bid not high enough")
-	}
-	if bid.userId == topbid.userId {
-		return errors.New("user is already highest bidder")
+	if topbid != nil {
+		if bid.Price() <= topbid.Price() {
+			return errors.New("bid not high enough")
+		}
+		if bid.userId == topbid.userId {
+			return errors.New("user is already highest bidder")
+		}
 	}
 	return nil
 }
