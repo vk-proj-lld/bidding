@@ -21,7 +21,7 @@ type Auction struct {
 	closed bool
 }
 
-var auctioncounter uint32 = 1
+var auctioncounter uint32
 
 func NewAuction(sellerID int, article *Article, creationTime, finalizationTime time.Time, minprice, maxprice float64) *Auction {
 	return &Auction{
@@ -39,7 +39,7 @@ func NewAuction(sellerID int, article *Article, creationTime, finalizationTime t
 func (auc *Auction) Id() int { return auc.aucitonID }
 
 func (auc *Auction) String() string {
-	return fmt.Sprintf("AuctionId (%d): \b%v", auc.aucitonID, auc.article)
+	return fmt.Sprintf("AuctionId (%d): \b%v, live from %v to %v", auc.aucitonID, auc.article, auc.creationTime, auc.finalizationTime)
 }
 
 func (auc *Auction) ValidateBid(bid *Bid) error {
@@ -55,6 +55,7 @@ func (auc *Auction) ValidateBid(bid *Bid) error {
 func (auc *Auction) FinalizationTime() time.Time { return auc.finalizationTime }
 func (auc *Auction) CreationTime() time.Time     { return auc.creationTime }
 
+func (auc *Auction) IsClosed() bool { return auc.closed }
 func (auc *Auction) Close() {
 	auc.closed = true
 }

@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 )
 
-var usercounter uint32 = 1
+var usercounter uint32
 
 type User struct {
 	id   int
