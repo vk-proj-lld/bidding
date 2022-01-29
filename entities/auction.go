@@ -39,7 +39,7 @@ func NewAuction(sellerID int, article *Article, creationTime, finalizationTime t
 func (auc *Auction) Id() int { return auc.aucitonID }
 
 func (auc *Auction) String() string {
-	return fmt.Sprintf("AuctionId (%d): \b%v, live from %v to %v", auc.aucitonID, auc.article, auc.creationTime, auc.finalizationTime)
+	return fmt.Sprintf("AuctionId (%d): \b%v, live from %v to %v", auc.aucitonID, auc.article, auc.creationTime.Format("2006-01-02 15:04:05"), auc.finalizationTime.Format("2006-01-02 15:04:05"))
 }
 
 func (auc *Auction) ValidateBid(bid *Bid) error {

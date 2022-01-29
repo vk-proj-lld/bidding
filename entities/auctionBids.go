@@ -65,3 +65,16 @@ func (aucbids *AuctionBids) AddBid(bid *Bid) error {
 	aucbids.bids.Push(bid)
 	return nil
 }
+
+func (aucbids *AuctionBids) GetList() []*Bid {
+	var bids []*Bid
+	var tmpbids []interface{}
+	for !aucbids.bids.Empty() {
+		b, _ := aucbids.bids.Peek()
+		tmpbids = append(tmpbids, b)
+		bid, _ := b.(*Bid)
+		bids = append(bids, bid)
+	}
+	aucbids.bids.Push(tmpbids...)
+	return bids
+}

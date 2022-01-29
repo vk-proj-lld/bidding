@@ -42,15 +42,16 @@ func main() {
 	u4, _ := auctionusecase.CreateUser("Muskan")
 	out.Write("creating user:", u4, err)
 	bidders := []*entities.User{u1, u2, u3, u4}
+	rangen := rand.New(rand.NewSource(time.Now().UnixMicro()))
 	go func() {
 		slots := len(bidders)
 		start := 500
 		for !auction.IsClosed() {
-			start = start + 100*rand.Intn(50)
-			u := bidders[rand.Intn(slots)]
+			start = start + 100*rangen.Intn(50)
+			u := bidders[rangen.Intn(slots)]
 			b, err := auctionusecase.PlaceBid(u.Id(), auction.Id(), float64(start))
 			out.Write("placing bid:", b, u, err)
-			time.Sleep(time.Millisecond * 100 * time.Duration(rand.Intn(10)))
+			time.Sleep(time.Millisecond * 100 * time.Duration(rangen.Intn(10)))
 		}
 	}()
 	wg.Wait()

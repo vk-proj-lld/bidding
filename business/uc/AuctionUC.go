@@ -2,6 +2,7 @@ package uc
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/vkstack/bidding/entities"
@@ -11,17 +12,20 @@ import (
 
 type auctionUseCase struct {
 	repo interfaces.IAucRepo
+	wg   *sync.WaitGroup
 
 	aucchan       chan *entities.Auction
 	outputchannel notifiers.IOut
 }
 
-func NewAuctionUseCase(repo interfaces.IAucRepo, out notifiers.IOut) interfaces.IAucUC {
+func NewAuctionUseCase(wg *sync.WaitGroup, repo interfaces.IAucRepo, out notifiers.IOut) interfaces.IAucUC {
 	aucuc := auctionUseCase{
-		repo:    repo,
-		aucchan: make(chan *entities.Auction),
+		wg:            wg,
+		repo:          repo,
+		aucchan:       make(chan *entities.Auction),
+		outputchannel: out,
 	}
-	go aucuc.InitAuctionsListner()
+	go aucuc.initAuctionsListner()
 	return &aucuc
 }
 
@@ -39,7 +43,7 @@ func (aucuc *auctionUseCase) CreateUser(name string) (*entities.User, error) {
 		case 2. finalizatiotime is invalid
 */
 func (aucuc *auctionUseCase) CreateAuction(userId int, article entities.Article, minprice, maxprice float64, finalization string) (*entities.Auction, error) {
-	finalizationTime, err := time.Parse("2006-01-02 15:04:05", finalization)
+	finalizationTime, err := time.ParseInLocation("2006-01-02 15:04:05", finalization, time.Local)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +55,8 @@ func (aucuc *auctionUseCase) CreateAuction(userId int, article entities.Article,
 	if err := aucuc.repo.SaveAuction(auction); err != nil {
 		return nil, err
 	}
-	go aucuc.RunInBackground(auction)
+	aucuc.wg.Add(1)
+	go aucuc.runInBackground(auction)
 	return auction, nil
 }
 
@@ -62,22 +67,22 @@ func (aucuc *auctionUseCase) CreateAuction(userId int, article entities.Article,
 		case 3. current leader has higher bidding
 		case 4: user is already highest bidder
 */
-func (aucuc *auctionUseCase) PlaceBid(userId, auctionId int, price float64) (bool, error) {
+func (aucuc *auctionUseCase) PlaceBid(userId, auctionId int, price float64) (*entities.Bid, error) {
 	auction := aucuc.repo.GetAuction(auctionId)
 	auctionbids := aucuc.repo.GetAuctionBids(auctionId)
 
 	if auction == nil || auctionbids == nil {
-		return false, errors.New("invalid auction, non-existing")
+		return nil, errors.New("invalid auction, non-existing")
 	}
 	bid := entities.NewBid(auctionId, userId, price, time.Now())
 
 	if err := auction.ValidateBid(bid); err != nil {
-		return false, err
+		return nil, err
 	}
 	if err := auctionbids.AddBid(bid); err != nil {
-		return false, err
+		return nil, err
 	}
-	return true, nil
+	return bid, nil
 }
 
 func (aucuc *auctionUseCase) GetWinner(auctionId int) (*entities.Bid, *entities.User, error) {
@@ -88,14 +93,14 @@ func (aucuc *auctionUseCase) GetLeaderBoard(auctionId int) []*entities.Bid {
 	return nil
 }
 
-func (aucuc *auctionUseCase) RunInBackground(auction *entities.Auction) {
+func (aucuc *auctionUseCase) runInBackground(auction *entities.Auction) {
 	d := auction.FinalizationTime().Sub(auction.CreationTime())
 	ticker := time.NewTicker(d)
 	<-ticker.C
 	aucuc.aucchan <- auction
 }
 
-func (aucuc *auctionUseCase) InitAuctionsListner() {
+func (aucuc *auctionUseCase) initAuctionsListner() {
 	for auction := range aucuc.aucchan {
 		auctionBids := aucuc.repo.GetAuctionBids(auction.Id())
 		winningbid := auctionBids.GetHighestBid()
@@ -106,5 +111,6 @@ func (aucuc *auctionUseCase) InitAuctionsListner() {
 			auction.CalculateProfit(winningbid),
 			winner,
 		)
+		aucuc.wg.Done()
 	}
 }
