@@ -53,9 +53,11 @@ func (auc *Auction) ValidateBid(bid *Bid) error {
 }
 
 func (auc *Auction) FinalizationTime() time.Time { return auc.finalizationTime }
-func (auc *Auction) CreationTime() time.Time     { return auc.creationTime }
+
+func (auc *Auction) CreationTime() time.Time { return auc.creationTime }
 
 func (auc *Auction) IsClosed() bool { return auc.closed }
+
 func (auc *Auction) Close() {
 	auc.closed = true
 }
