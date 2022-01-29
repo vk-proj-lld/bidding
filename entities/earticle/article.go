@@ -1,4 +1,4 @@
-package entities
+package earticle
 
 import (
 	"fmt"

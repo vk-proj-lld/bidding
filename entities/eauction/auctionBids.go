@@ -1,4 +1,4 @@
-package entities
+package eauction
 
 import (
 	"errors"
@@ -20,7 +20,7 @@ func bidComp(b1, b2 interface{}) int {
 	if !ok1 && ok2 {
 		return 0
 	}
-	if bid1.price < bid2.price {
+	if bid1.Price() < bid2.Price() {
 		return 1
 	}
 	return -1
@@ -49,7 +49,7 @@ func (aucbids *AuctionBids) ValidateBid(bid *Bid) error {
 		if bid.Price() <= topbid.Price() {
 			return errors.New("bid not high enough")
 		}
-		if bid.userId == topbid.userId {
+		if bid.UserId() == topbid.UserId() {
 			return errors.New("user is already highest bidder")
 		}
 	}
@@ -70,7 +70,7 @@ func (aucbids *AuctionBids) GetList() []*Bid {
 	var bids []*Bid
 	var tmpbids []interface{}
 	for !aucbids.bids.Empty() {
-		b, _ := aucbids.bids.Peek()
+		b, _ := aucbids.bids.Pop()
 		tmpbids = append(tmpbids, b)
 		bid, _ := b.(*Bid)
 		bids = append(bids, bid)

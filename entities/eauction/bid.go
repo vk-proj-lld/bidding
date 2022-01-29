@@ -1,4 +1,4 @@
-package entities
+package eauction
 
 import (
 	"fmt"
@@ -31,6 +31,7 @@ func NewBid(auctionId, userId int, price float64, btime time.Time) *Bid {
 func (b *Bid) String() string {
 	return fmt.Sprintf("Bid of price:%.2f placed by %d in auction %d", b.price, b.userId, b.aucitonId)
 }
+func (b *Bid) BidTime() time.Time { return b.btime }
 
 func (b *Bid) Price() float64 { return b.price }
 

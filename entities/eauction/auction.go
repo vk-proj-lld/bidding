@@ -1,14 +1,16 @@
-package entities
+package eauction
 
 import (
 	"errors"
 	"fmt"
 	"sync/atomic"
 	"time"
+
+	"github.com/vkstack/bidding/entities/earticle"
 )
 
 type Auction struct {
-	article *Article
+	article *earticle.Article
 
 	aucitonID,
 	sellerID int
@@ -23,7 +25,7 @@ type Auction struct {
 
 var auctioncounter uint32
 
-func NewAuction(sellerID int, article *Article, creationTime, finalizationTime time.Time, minprice, maxprice float64) *Auction {
+func NewAuction(sellerID int, article *earticle.Article, creationTime, finalizationTime time.Time, minprice, maxprice float64) *Auction {
 	return &Auction{
 		aucitonID:        int(atomic.AddUint32(&auctioncounter, 1)),
 		sellerID:         sellerID,
@@ -43,10 +45,10 @@ func (auc *Auction) String() string {
 }
 
 func (auc *Auction) ValidateBid(bid *Bid) error {
-	if bid.price < auc.minprice || bid.price > auc.maxprice {
+	if bid.Price() < auc.minprice || bid.Price() > auc.maxprice {
 		return errors.New("price not in range")
 	}
-	if auc.closed || bid.btime.After(auc.finalizationTime) {
+	if auc.closed || bid.BidTime().After(auc.finalizationTime) {
 		return errors.New("bids is closed")
 	}
 	return nil
@@ -64,5 +66,5 @@ func (auc *Auction) Close() {
 
 func (auc *Auction) CalculateProfit(bid *Bid) interface{} {
 	// changeable for later
-	return fmt.Sprintf("Overall Profit made on auction with the Bid is: %.2f", bid.price)
+	return fmt.Sprintf("Overall Profit made on auction with the Bid is: %.2f", bid.Price())
 }

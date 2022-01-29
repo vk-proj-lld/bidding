@@ -1,14 +1,19 @@
-package entities
+package leaderboard
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/vkstack/bidding/entities"
+	"github.com/vkstack/bidding/entities/eauction"
+)
 
 type LeaderboardLine struct {
 	lineId int
-	bid    *Bid
-	user   *User
+	bid    *eauction.Bid
+	user   *entities.User
 }
 
-func NewLine(lineId int, bid Bid, user User) *LeaderboardLine {
+func NewLine(lineId int, bid eauction.Bid, user entities.User) *LeaderboardLine {
 	return &LeaderboardLine{
 		lineId: lineId,
 		bid:    &bid,
